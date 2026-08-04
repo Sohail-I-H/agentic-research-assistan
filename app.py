@@ -115,7 +115,7 @@ if st.button("Generate Research"):
 
     with st.expander("Workflow Logs"):
 
-        for log in result["logs"]:
+        for log in result.get("logs", []):
 
             st.write(log)
 
@@ -125,7 +125,7 @@ if st.button("Generate Research"):
 
     st.header("📖 Literature Review")
 
-    st.write(result["literature_review"])
+    st.write(result.get("literature_review", "Not generated"))
 
     # ===========================================
     # Research Gaps
@@ -133,7 +133,7 @@ if st.button("Generate Research"):
 
     st.header("🔍 Research Gaps")
 
-    st.write(result["research_gaps"])
+    result.get("research_gaps", "Not generated")
 
     # ===========================================
     # Novel Ideas
@@ -141,7 +141,7 @@ if st.button("Generate Research"):
 
     st.header("💡 Novel Ideas")
 
-    st.write(result["novel_ideas"])
+    result.get("novel_ideas", "Not generated")
 
     # ===========================================
     # Paper
@@ -149,7 +149,7 @@ if st.button("Generate Research"):
 
     st.header("📝 Generated Research Paper")
 
-    st.markdown(result["generated_paper"])
+    result.get("generated_paper", "Not generated")
 
     st.download_button(
         "Download Paper",
@@ -163,7 +163,7 @@ if st.button("Generate Research"):
 
     st.header("📚 References")
 
-    st.write(result["citations"])
+    result.get("citations", "Not generated")
 
     if result["error"]:
 
