@@ -72,3 +72,7 @@ class AgentState(TypedDict):
     current_step: str
 
     error: Optional[str]
+
+    report_markdown: str
+
+    report_pdf: bytes
