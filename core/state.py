@@ -62,7 +62,7 @@ class AgentState(TypedDict):
 
     generated_paper: str
 
-    citations: List[str]
+    citations: str
 
     # ==========================================================
     # Workflow
