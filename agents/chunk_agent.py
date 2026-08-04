@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import List, Dict
 
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from core.state import AgentState
 from utils.helper import add_log, update_step
