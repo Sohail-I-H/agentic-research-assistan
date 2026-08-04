@@ -41,13 +41,9 @@ def get_tavily_client():
 # arXiv Search
 # ==========================================================
 
-def search_arxiv(
-    query: str,
-    max_results: int = 5,
-):
-    """
-    Search arXiv.
-    """
+def search_arxiv(query: str, max_results: int = 5):
+
+    client = arxiv.Client()
 
     search = arxiv.Search(
         query=query,
@@ -57,7 +53,7 @@ def search_arxiv(
 
     papers = []
 
-    for result in search.results():
+    for result in client.results(search):
 
         papers.append(
             {
@@ -75,7 +71,6 @@ def search_arxiv(
         )
 
     return papers
-
 
 # ==========================================================
 # Tavily Search
