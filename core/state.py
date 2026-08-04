@@ -32,6 +32,11 @@ class AgentState(TypedDict):
     chunks: List[Any]
 
     # =============================
+    # Embeddings
+    # =============================
+    embeddings: Any
+
+    # =============================
     # Vector Store
     # =============================
     vector_store: Optional[Any]
