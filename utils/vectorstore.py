@@ -2,10 +2,10 @@
 FAISS Vector Store Utilities
 
 Responsibilities:
-- Create FAISS index
-- Store document embeddings
-- Perform similarity search
-- Save and load vector database
+- Create and manage FAISS index
+- Store precomputed embeddings
+- Perform semantic search
+- Save/load vector database
 """
 
 from __future__ import annotations
@@ -18,11 +18,13 @@ import faiss
 import numpy as np
 
 from utils.embeddings import (
-    embed_documents,
     embed_text,
     embedding_dimension,
 )
-from utils.helper import VECTOR_DB_DIR, create_project_directories
+from utils.helper import (
+    VECTOR_DB_DIR,
+    create_project_directories,
+)
 
 
 INDEX_FILE = VECTOR_DB_DIR / "research.index"
@@ -30,9 +32,6 @@ METADATA_FILE = VECTOR_DB_DIR / "metadata.pkl"
 
 
 class FAISSVectorStore:
-    """
-    Simple FAISS vector store with metadata support.
-    """
 
     def __init__(self):
 
@@ -40,27 +39,24 @@ class FAISSVectorStore:
 
         self.dimension = embedding_dimension()
 
-        self.index = faiss.IndexFlatIP(self.dimension)
+        self.index = faiss.IndexFlatIP(
+            self.dimension
+        )
 
-        self.metadata: List[Dict] = []
+        self.metadata = []
 
     # ======================================================
-    # Add Documents
+    # Add Embeddings
     # ======================================================
 
-    def add_documents(
+    def add_embeddings(
         self,
-        texts: List[str],
+        embeddings: np.ndarray,
         metadata: List[Dict],
-    ) -> None:
-        """
-        Add document chunks to the vector database.
-        """
+    ):
 
-        if not texts:
+        if len(embeddings) == 0:
             return
-
-        embeddings = embed_documents(texts)
 
         self.index.add(embeddings)
 
@@ -75,23 +71,23 @@ class FAISSVectorStore:
         query: str,
         top_k: int = 5,
     ) -> List[Dict]:
-        """
-        Perform semantic similarity search.
-        """
 
         if self.index.ntotal == 0:
             return []
 
         query_embedding = embed_text(query)
 
-        distances, indices = self.index.search(
+        scores, indices = self.index.search(
             np.array([query_embedding]),
             top_k,
         )
 
         results = []
 
-        for score, idx in zip(distances[0], indices[0]):
+        for score, idx in zip(
+            scores[0],
+            indices[0],
+        ):
 
             if idx == -1:
                 continue
@@ -108,10 +104,7 @@ class FAISSVectorStore:
     # Save
     # ======================================================
 
-    def save(self) -> None:
-        """
-        Save index and metadata.
-        """
+    def save(self):
 
         create_project_directories()
 
@@ -120,36 +113,46 @@ class FAISSVectorStore:
             str(INDEX_FILE),
         )
 
-        with open(METADATA_FILE, "wb") as f:
-            pickle.dump(self.metadata, f)
+        with open(
+            METADATA_FILE,
+            "wb",
+        ) as f:
+
+            pickle.dump(
+                self.metadata,
+                f,
+            )
 
     # ======================================================
     # Load
     # ======================================================
 
-    def load(self) -> None:
-        """
-        Load saved index.
-        """
+    def load(self):
 
         if INDEX_FILE.exists():
-            self.index = faiss.read_index(str(INDEX_FILE))
+
+            self.index = faiss.read_index(
+                str(INDEX_FILE)
+            )
 
         if METADATA_FILE.exists():
 
-            with open(METADATA_FILE, "rb") as f:
+            with open(
+                METADATA_FILE,
+                "rb",
+            ) as f:
+
                 self.metadata = pickle.load(f)
 
     # ======================================================
     # Clear
     # ======================================================
 
-    def clear(self) -> None:
-        """
-        Remove all vectors.
-        """
+    def clear(self):
 
-        self.index = faiss.IndexFlatIP(self.dimension)
+        self.index = faiss.IndexFlatIP(
+            self.dimension
+        )
 
         self.metadata = []
 
@@ -157,15 +160,17 @@ class FAISSVectorStore:
     # Statistics
     # ======================================================
 
-    def stats(self) -> Dict:
-        """
-        Return database statistics.
-        """
+    def stats(self):
 
         return {
+
             "vectors": self.index.ntotal,
+
             "dimension": self.dimension,
-            "metadata_entries": len(self.metadata),
+
+            "metadata_entries": len(
+                self.metadata
+            ),
         }
 
 
@@ -174,35 +179,53 @@ class FAISSVectorStore:
 # ==========================================================
 
 def build_vector_store(
+    embeddings: np.ndarray,
     chunks: List[Dict],
 ) -> FAISSVectorStore:
     """
-    Build FAISS vector database from document chunks.
-
-    Expected chunk format:
-    {
-        "text": "...",
-        "source": "...",
-        "page": 1
-    }
+    Build FAISS vector database using
+    precomputed embeddings.
     """
 
-    vector_store = FAISSVectorStore()
+    store = FAISSVectorStore()
 
-    texts = [chunk["text"] for chunk in chunks]
+    metadata = []
 
-    metadata = [
-        {
-            "text": chunk["text"],
-            "source": chunk.get("source", ""),
-            "page": chunk.get("page", 0),
-        }
-        for chunk in chunks
-    ]
+    for chunk in chunks:
 
-    vector_store.add_documents(
-        texts=texts,
-        metadata=metadata,
+        metadata.append(
+
+            {
+
+                "text": chunk["text"],
+
+                "source": chunk.get(
+                    "source",
+                    "",
+                ),
+
+                "page": chunk.get(
+                    "page",
+                    0,
+                ),
+
+                "title": chunk.get(
+                    "title",
+                    "",
+                ),
+
+                "author": chunk.get(
+                    "author",
+                    "",
+                ),
+
+            }
+
+        )
+
+    store.add_embeddings(
+        embeddings,
+        metadata,
     )
 
-    return vector_store
+    return store
