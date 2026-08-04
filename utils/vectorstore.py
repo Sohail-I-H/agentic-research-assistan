@@ -94,7 +94,7 @@ class FAISSVectorStore:
 
             item = self.metadata[idx].copy()
 
-            item["score"] = float(score)
+            item["dense_score"] = float(score)
 
             results.append(item)
 
