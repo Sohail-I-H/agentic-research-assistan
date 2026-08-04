@@ -152,3 +152,38 @@ Include:
 
 Keep the summary concise and academic.
 """
+
+ABSTRACT_PROMPT = """
+Write a professional IEEE-style abstract.
+Maximum 250 words.
+"""
+
+INTRODUCTION_PROMPT = """
+Write an academic introduction.
+
+Include:
+
+- Motivation
+
+- Problem Statement
+
+- Objectives
+
+- Contributions
+"""
+
+METHODOLOGY_PROMPT = """
+Write the methodology section.
+"""
+
+RESULTS_PROMPT = """
+Write the expected results section.
+"""
+
+FUTURE_WORK_PROMPT = """
+Write the future work section.
+"""
+
+CONCLUSION_PROMPT = """
+Write the conclusion.
+"""
